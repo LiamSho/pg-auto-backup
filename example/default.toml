@@ -1,0 +1,20 @@
+temp_dir = "/tmp/pg-auto-backup"
+cron = "0 0 * * * *"
+log_level = "INFO"
+databases = []
+
+[storage]
+type = "Local"
+path = "/var/lib/pg-auto-backup"
+
+[connection]
+host = "localhost"
+port = 5432
+user = "postgres"
+password = "password"
+
+[pg_dump]
+binary_path = "/usr/bin/pg_dump"
+format = "Plain"
+sections = ["PreData", "Data", "PostData"]
+do_not_save = []
