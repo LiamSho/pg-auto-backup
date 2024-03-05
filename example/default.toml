@@ -1,20 +1,88 @@
-temp_dir = "/tmp/pg-auto-backup"
-cron = "0 0 * * * *"
-log_level = "INFO"
-databases = []
+temp_dir = "/tmp/pg-auto-backup" # Temporary directory for backup files
+cron = "0 0 * * * *"             # Cron expression for backup schedule
+log_level = "INFO"               # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 [storage]
+# Storage type (Local, S3)
 type = "Local"
+
+# The directory where the backup files will be stored
+# When using the Local storage type
 path = "/var/lib/pg-auto-backup"
 
+# S3 Access key
+## access_key = ""
+
+# S3 Secret key
+## access_secret = ""
+
+# S3 Endpoint
+## endpoint = ""
+
+# S3 Region
+## region = ""
+
+# S3 Bucket
+## bucket = ""
+
+# S3 Enforce path style
+# Enable this option for MinIO and other S3-compatible services
+## enforce_path_style = false
+
 [connection]
+# Database host
 host = "localhost"
+
+# Database port
 port = 5432
+
+# Database user
+# Note that the user must have the necessary permissions to perform the backup
 user = "postgres"
+
+# Database user password
 password = "password"
 
 [pg_dump]
+# Path to pg_dump binary
 binary_path = "/usr/bin/pg_dump"
+
+# Format of the backup (Plain, Custom, Tar)
+# Note that the directory type is not supported
+# --format={} option in pg_dump
 format = "Plain"
+
+# Section to include in the backup (PreData, Data, PostData)
+# --section={} option in pg_dump
 sections = ["PreData", "Data", "PostData"]
+
+# Do not save the corresponding data
+# Available values:
+#   LargeObjects, Owner, Privileges, Comments,
+#   Publications, SecurityLabels, Subscriptions,
+#   TableAccessMethod, Tablespace, ToastCompression,
+#   UnloggedTableData
+# --no-{} option in pg_dump
 do_not_save = []
+
+# Backup multiple databases by duplicating
+# the [[databases]] section
+[[databases]]
+# Database name
+name = "my_database"
+
+# Tables to include in the backup, empty for all
+# --table={} option in pg_dump
+include_tables = []
+
+# Tables to exclude from the backup
+# --exclude-table={} option in pg_dump
+exclude_tables = []
+
+# Schemas to include in the backup, empty for all
+# --schema={} option in pg_dump
+include_schema = []
+
+# Schemas to exclude from the backup
+# --exclude-schema={} option in pg_dump
+exclude_schema = []
