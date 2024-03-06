@@ -8,6 +8,8 @@ pub async fn database_backup() {
     info!("Running backup job");
 
     let cfg = configs::INSTANCE.get().unwrap();
+    let tz: chrono::prelude::FixedOffset =
+        chrono::FixedOffset::east_opt(cfg.timezone_offset * 3600).unwrap();
 
     let mut handles = vec![];
 
@@ -20,7 +22,9 @@ pub async fn database_backup() {
 
             let file_name = format!(
                 "backup-{}.{}",
-                chrono::Utc::now().format("%Y-%m-%d-%H-%M-%S"),
+                chrono::Utc::now()
+                    .with_timezone(&tz)
+                    .format("%Y-%m-%d-%H-%M-%S"),
                 file_ext
             );
             let random_file_name = uuid::Uuid::new_v4().to_string();
