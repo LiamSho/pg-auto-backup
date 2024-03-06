@@ -56,14 +56,41 @@ format = "Plain"
 # --section={} option in pg_dump
 sections = ["PreData", "Data", "PostData"]
 
+# Whether to create the database before restoring
+#   Can be omitted
+#   Can be overridden by database specific settings
+# --create option in pg_dump
+## create = false
+
+# Whether to drop the database before restoring
+#   Can be omitted
+#   Can be overridden by database specific settings
+# --clean option in pg_dump
+## clean = false
+
 # Do not save the corresponding data
+#   Can be omitted
+#   Can be overridden by database specific settings
 # Available values:
 #   LargeObjects, Owner, Privileges, Comments,
 #   Publications, SecurityLabels, Subscriptions,
 #   TableAccessMethod, Tablespace, ToastCompression,
 #   UnloggedTableData
 # --no-{} option in pg_dump
-do_not_save = []
+## do_not_save = []
+
+# Disable something
+#   Can be omitted
+#   Can be overridden by database specific settings
+# Available values:
+#   DollarQuoting, Triggers
+# --disable={} option in pg_dump
+## disable = []
+
+# Extra arguments for pg_dump
+#   Can be omitted
+#   Can be overridden by database specific settings
+## extra_args = []
 
 # Backup multiple databases by duplicating
 # the [[databases]] section
@@ -72,17 +99,63 @@ do_not_save = []
 name = "my_database"
 
 # Tables to include in the backup, empty for all
+#   Can be omitted
 # --table={} option in pg_dump
-include_tables = []
+## include_tables = []
 
 # Tables to exclude from the backup
+#   Can be omitted
 # --exclude-table={} option in pg_dump
-exclude_tables = []
+## exclude_tables = []
 
 # Schemas to include in the backup, empty for all
+#   Can be omitted
 # --schema={} option in pg_dump
-include_schema = []
+## include_schema = []
 
 # Schemas to exclude from the backup
+#   Can be omitted
 # --exclude-schema={} option in pg_dump
-exclude_schema = []
+## exclude_schema = []
+
+# Section to include in the backup (PreData, Data, PostData)
+#   Can be omitted
+#   Will override the pg_dump.sections option
+# --section={} option in pg_dump
+## sections = ["PreData", "Data", "PostData"]
+
+# Whether to create the database before restoring
+#   Can be omitted
+#   Will override the pg_dump.create option
+# --create option in pg_dump
+## create = false
+
+# Whether to drop the database before restoring
+#   Can be omitted
+#   Will override the pg_dump.clean option
+# --clean option in pg_dump
+## clean = false
+
+# Do not save the corresponding data
+#   Can be omitted
+#   Will override the pg_dump.do_not_save option
+# Available values:
+#   LargeObjects, Owner, Privileges, Comments,
+#   Publications, SecurityLabels, Subscriptions,
+#   TableAccessMethod, Tablespace, ToastCompression,
+#   UnloggedTableData
+# --no-{} option in pg_dump
+## do_not_save = []
+
+# Disable something
+#   Can be omitted
+#   Will override the pg_dump.disable option
+# Available values:
+#   DollarQuoting, Triggers
+# --disable={} option in pg_dump
+## disable = []
+
+# Extra arguments for pg_dump
+#   Can be omitted
+#   Will override the pg_dump.extra_args option
+## extra_args = []
