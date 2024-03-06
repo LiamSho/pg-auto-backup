@@ -17,6 +17,7 @@ pub struct S3 {
     pub endpoint: String,
     pub region: String,
     pub bucket: String,
+    pub path: Option<String>,
     pub enforce_path_style: bool,
 }
 
@@ -52,7 +53,10 @@ impl Storage for S3 {
     }
 
     async fn save_file(&self, local_temp_file: &str, save_path: &str, file_name: String) {
-        let key = format!("{}/{}", save_path, file_name);
+        let key = match &self.path {
+            Some(val) => format!("{}/{}/{}", val, save_path, file_name),
+            None => format!("{}/{}", save_path, file_name),
+        };
 
         let client = S3_CLIENT.get().unwrap();
         let body = ByteStream::from_path(Path::new(local_temp_file)).await;
