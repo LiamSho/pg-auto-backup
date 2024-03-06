@@ -28,7 +28,8 @@ pub async fn database_backup() {
                 file_ext
             );
             let random_file_name = uuid::Uuid::new_v4().to_string();
-            let local_temp_file = Path::new(&cfg.temp_dir).join(random_file_name);
+            let local_temp_file =
+                Path::new(&cfg.temp_dir).join(format!("{}.{}", random_file_name, file_ext));
             let local_temp_file = local_temp_file.as_path().to_str().unwrap();
 
             let result =
