@@ -10,6 +10,11 @@ pub async fn dump_database(
     connection: &Connection,
     output: &str,
 ) -> Result<(), Option<i32>> {
+    let format = match &database.format {
+        Some(val) => val,
+        None => &pg_dump.format,
+    };
+
     let mut binding = Command::new(&pg_dump.binary_path);
     let cmd = binding
         .arg(format!("--host={host}", host = &connection.host))
@@ -18,7 +23,7 @@ pub async fn dump_database(
             "--username={username}",
             username = &connection.user
         ))
-        .arg(format!("--format={format}", format = &pg_dump.format))
+        .arg(format!("--format={format}", format = format))
         .arg(format!("--file={output}", output = output));
 
     // --section={}

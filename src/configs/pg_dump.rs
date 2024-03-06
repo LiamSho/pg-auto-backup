@@ -12,13 +12,3 @@ pub struct PgDump {
     pub disable: Option<Vec<Disable>>,
     pub extra_args: Option<Vec<String>>,
 }
-
-impl PgDump {
-    pub fn get_file_ext(&self) -> &str {
-        match &self.format {
-            Format::Plain => "sql",
-            Format::Custom => "bin",
-            Format::Tar => "tar",
-        }
-    }
-}

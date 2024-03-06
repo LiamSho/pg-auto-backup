@@ -18,3 +18,13 @@ impl fmt::Display for Format {
         }
     }
 }
+
+impl Format {
+    pub fn get_file_ext(&self) -> &str {
+        match &self {
+            Format::Plain => "sql",
+            Format::Custom => "bin",
+            Format::Tar => "tar",
+        }
+    }
+}

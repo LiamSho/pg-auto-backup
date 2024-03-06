@@ -48,6 +48,7 @@ password = "password"
 binary_path = "/usr/bin/pg_dump"
 
 # Format of the backup (Plain, Custom, Tar)
+#   Can be overridden by database specific settings
 # Note that the directory type is not supported
 # --format={} option in pg_dump
 format = "Plain"
@@ -97,6 +98,13 @@ sections = ["PreData", "Data", "PostData"]
 [[databases]]
 # Database name
 name = "my_database"
+
+# Format of the backup (Plain, Custom, Tar)
+#   Can be omitted
+#   Will override the pg_dump.format option
+# Note that the directory type is not supported
+# --format={} option in pg_dump
+## format = "Plain"
 
 # Tables to include in the backup, empty for all
 #   Can be omitted

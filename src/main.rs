@@ -88,12 +88,16 @@ async fn run_job() {
     info!("Running backup job");
 
     let cfg = configs::INSTANCE.get().unwrap();
-    let file_ext = (*cfg).pg_dump.get_file_ext();
 
     let mut handles = vec![];
 
     for db in &cfg.databases {
         let handle = tokio::spawn(async move {
+            let file_ext = match &db.format {
+                Some(val) => val.get_file_ext(),
+                None => &cfg.pg_dump.format.get_file_ext(),
+            };
+
             let file_name = format!(
                 "backup-{}.{}",
                 chrono::Utc::now().format("%Y-%m-%d-%H-%M-%S"),
