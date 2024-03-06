@@ -66,8 +66,8 @@ impl Storage for S3 {
 
         match result {
             Ok(val) => info!(
-                "File uploaded successfully, SHA256: {:?}",
-                val.checksum_sha256
+                "File uploaded to S3 successfully, etag: {}",
+                val.e_tag.unwrap_or("null".to_string())
             ),
             Err(e) => error!("Error uploading file: {:?}", e),
         };

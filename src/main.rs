@@ -114,7 +114,7 @@ async fn run_job() {
                     );
                 }
                 Ok(_) => {
-                    info!("Backup of database {} successed", db.name);
+                    info!("Database {} dumped successfully", db.name);
                     match &cfg.storage {
                         configs::Location::S3(s3) => {
                             (*s3).save_file(local_temp_file, &db.name, file_name).await;
