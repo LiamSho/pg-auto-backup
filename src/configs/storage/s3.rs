@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use aws_sdk_s3::{config::Credentials, primitives::ByteStream};
+use aws_sdk_s3::{
+    config::{BehaviorVersion, Credentials, Region},
+    primitives::ByteStream,
+};
 use log::{error, info};
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
@@ -82,6 +85,8 @@ fn get_aws_s3_client(s3: &S3) -> aws_sdk_s3::Client {
 
     let config = aws_sdk_s3::config::Builder::new()
         .endpoint_url(&s3.endpoint)
+        .behavior_version(BehaviorVersion::latest())
+        .region(Region::new(s3.region.clone()))
         .credentials_provider(credential)
         .force_path_style(s3.enforce_path_style)
         .build();
