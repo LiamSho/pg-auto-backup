@@ -1,6 +1,21 @@
-temp_dir = "/tmp/pg-auto-backup" # Temporary directory for backup files
-cron = "0 0 * * * *"             # Cron expression for backup schedule
-log_level = "INFO"               # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+# Temporary directory for backup files
+temp_dir = "/tmp/pg-auto-backup"
+
+# Cron expression for backup schedule
+# Order: second, minute, hour, day of month, month, day of week
+cron = "0 0 * * * *"
+
+# Timezone offset in hours
+#  0: UTC
+#  8: CST (China Standard Time)
+# -5: EST (Eastern Standard Time)
+timezone_offset = 0
+
+# Log level
+# Available values:
+#   DEBUG, INFO, WARNING, ERROR, CRITICAL
+log_level = "INFO"
+
 
 [storage]
 # Storage type (Local, S3)

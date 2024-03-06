@@ -9,6 +9,7 @@ use super::{storage::Local, Connection, Database, Location, PgDump};
 pub struct Config {
     pub temp_dir: String,
     pub cron: String,
+    pub timezone_offset: i32,
     pub log_level: LevelFilter,
     pub storage: Location,
     pub databases: Vec<Database>,
@@ -21,6 +22,7 @@ impl Default for Config {
         Config {
             temp_dir: "/tmp/pg-auto-backup".to_string(),
             cron: "0 0 * * * *".to_string(),
+            timezone_offset: 0,
             log_level: LevelFilter::Info,
             storage: Location::Local(Local {
                 path: "/var/lib/pg-auto-backup".to_string(),

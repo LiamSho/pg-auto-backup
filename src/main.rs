@@ -1,14 +1,15 @@
-use chrono::Utc;
+use chrono::FixedOffset;
 use cron::Schedule;
 use log::{error, info};
+use std::env;
 use std::str::FromStr;
-use std::{env, path::Path};
 use tokio::signal;
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
 use traits::Storage;
 
 mod configs;
 mod enums;
+mod job;
 mod pg;
 mod traits;
 
@@ -33,11 +34,13 @@ async fn main() -> Result<(), JobSchedulerError> {
 
     preflight_check().await;
 
+    let tz = FixedOffset::east_opt(cfg.timezone_offset * 3600).unwrap();
+
     let cron_expression = cfg.cron.as_str();
     info!("Cron expression: {}", cron_expression);
     let schedule = match Schedule::from_str(cron_expression) {
         Ok(s) => {
-            let next_datetime = s.upcoming(Utc).next().unwrap();
+            let next_datetime = s.upcoming(tz).next().unwrap();
             info!("Next tick of the scheduler: {}", next_datetime);
 
             s
@@ -47,19 +50,7 @@ async fn main() -> Result<(), JobSchedulerError> {
 
     let mut sched = JobScheduler::new().await?;
 
-    sched
-        .add(Job::new_cron_job_async(schedule, |uuid, mut l| {
-            Box::pin(async move {
-                run_job().await;
-
-                let next_tick = l.next_tick_for_job(uuid).await;
-                match next_tick {
-                    Ok(Some(ts)) => info!("Next tick for backup job: {}", ts),
-                    _ => error!("Error getting next tick for backup job"),
-                }
-            })
-        })?)
-        .await?;
+    add_jobs(&mut sched, schedule, tz).await?;
 
     info!("Starting scheduler");
     sched.start().await?;
@@ -84,66 +75,32 @@ async fn preflight_check() {
     }
 }
 
-async fn run_job() {
-    info!("Running backup job");
+async fn add_jobs(
+    sched: &mut JobScheduler,
+    schedule: Schedule,
+    timezone_offset: FixedOffset,
+) -> Result<uuid::Uuid, JobSchedulerError> {
+    sched
+        .add(Job::new_cron_job_async_tz(
+            schedule,
+            timezone_offset,
+            |uuid, mut l| {
+                Box::pin(async move {
+                    job::database_backup().await;
 
-    let cfg = configs::INSTANCE.get().unwrap();
+                    let cfg = configs::INSTANCE.get().unwrap();
+                    let tz = FixedOffset::east_opt(cfg.timezone_offset * 3600).unwrap();
 
-    let mut handles = vec![];
-
-    for db in &cfg.databases {
-        let handle = tokio::spawn(async move {
-            let file_ext = match &db.format {
-                Some(val) => val.get_file_ext(),
-                None => &cfg.pg_dump.format.get_file_ext(),
-            };
-
-            let file_name = format!(
-                "backup-{}.{}",
-                chrono::Utc::now().format("%Y-%m-%d-%H-%M-%S"),
-                file_ext
-            );
-            let random_file_name = uuid::Uuid::new_v4().to_string();
-            let local_temp_file = Path::new(&cfg.temp_dir).join(random_file_name);
-            let local_temp_file = local_temp_file.as_path().to_str().unwrap();
-
-            let result =
-                pg::dump_database(db, &cfg.pg_dump, &cfg.connection, local_temp_file).await;
-
-            match result {
-                Err(val) => {
-                    error!(
-                        "Error dumping database {}, pg_dump exit with {:?}",
-                        db.name, val
-                    );
-                }
-                Ok(_) => {
-                    info!("Database {} dumped successfully", db.name);
-                    match &cfg.storage {
-                        configs::Location::S3(s3) => {
-                            (*s3).save_file(local_temp_file, &db.name, file_name).await;
+                    let next_tick = l.next_tick_for_job(uuid).await;
+                    match next_tick {
+                        Ok(Some(ts)) => {
+                            let ts = ts.with_timezone(&tz);
+                            info!("Next tick for backup job: {}", ts.to_rfc3339())
                         }
-                        configs::Location::Local(local) => {
-                            (*local)
-                                .save_file(local_temp_file, &db.name, file_name)
-                                .await;
-                        }
-                    };
-                }
-            }
-
-            match tokio::fs::remove_file(local_temp_file).await {
-                Ok(_) => info!("Remove local temp file: {}", local_temp_file),
-                Err(err) => error!("Error removing local temp file: {}", err),
-            }
-        });
-
-        handles.push(handle);
-    }
-
-    for handle in handles {
-        handle.await.unwrap();
-    }
-
-    info!("Backup job completed")
+                        _ => error!("Error getting next tick for backup job"),
+                    }
+                })
+            },
+        )?)
+        .await
 }
