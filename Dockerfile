@@ -18,5 +18,7 @@ WORKDIR /app
 COPY --from=build /build/target/release/pg-auto-backup /app
 
 VOLUME [ "/app/config"]
+VOLUME [ "/var/lib/pg-auto-backup" ]
 
 ENTRYPOINT [ "/app/pg-auto-backup" ]
+CMD [ "-c", "/app/config/config.toml" ]
