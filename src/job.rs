@@ -54,6 +54,11 @@ pub async fn database_backup() {
                                 .save_file(local_temp_file, &db.name, file_name)
                                 .await
                         }
+                        configs::Location::Azure(azure) => {
+                            (*azure)
+                                .save_file(local_temp_file, &db.name, file_name)
+                                .await
+                        }
                     }
                 }
             };

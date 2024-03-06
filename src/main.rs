@@ -71,6 +71,7 @@ async fn preflight_check() {
     match &cfg.storage {
         configs::Location::S3(s3) => (*s3).preflight_check().await,
         configs::Location::Local(local) => (*local).preflight_check().await,
+        configs::Location::Azure(azure) => (*azure).preflight_check().await,
     }
 }
 
