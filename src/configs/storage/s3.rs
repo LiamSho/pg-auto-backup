@@ -40,12 +40,9 @@ impl Storage for S3 {
                     .iter()
                     .any(|b| b.name.is_some() && b.name.as_ref().unwrap() == &self.bucket);
                 if bucket_exist {
-                    info!("Preflight check success: S3 bucket {} exists", &self.bucket);
+                    info!("Preflight check: S3 bucket {} exists", &self.bucket);
                 } else {
-                    panic!(
-                        "Preflight check failed: S3 bucket {} does not exist",
-                        &self.bucket
-                    );
+                    panic!("Preflight check: S3 bucket {} does not exist", &self.bucket);
                 }
             }
             Err(e) => panic!("Error during S3 preflight check: {:?}", e),
