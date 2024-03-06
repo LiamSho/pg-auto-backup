@@ -22,7 +22,7 @@ pub async fn preflight_check(pg_dump: &PgDump) {
         .await;
 
     match status {
-        Ok(_) => info!("pg_dump binary found and version is ok"),
+        Ok(_) => info!("Preflight check: pg_dump binary found and version is ok"),
         Err(e) => panic!("Failed to run pg_dump --version: {}", e),
     };
 }

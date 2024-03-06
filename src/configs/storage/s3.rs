@@ -4,7 +4,7 @@ use aws_sdk_s3::{
     config::{BehaviorVersion, Credentials, Region},
     primitives::ByteStream,
 };
-use log::{error, info};
+use log::{debug, error, info};
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
@@ -52,7 +52,12 @@ impl Storage for S3 {
         }
     }
 
-    async fn save_file(&self, local_temp_file: &str, save_path: &str, file_name: String) {
+    async fn save_file(
+        &self,
+        local_temp_file: &str,
+        save_path: &str,
+        file_name: String,
+    ) -> Result<String, ()> {
         let key = match &self.path {
             Some(val) => format!("{}/{}/{}", val, save_path, file_name),
             None => format!("{}/{}", save_path, file_name),
@@ -69,12 +74,16 @@ impl Storage for S3 {
             .await;
 
         match result {
-            Ok(val) => info!(
-                "File uploaded to S3 successfully, etag: {}",
-                val.e_tag.unwrap_or("null".to_string())
-            ),
-            Err(e) => error!("Error uploading file: {:?}", e),
-        };
+            Ok(val) => {
+                let etag = val.e_tag.unwrap_or("null".to_string());
+                debug!("File uploaded to S3 successfully, etag: {}", &etag);
+                Ok(format!("S3 with etag: {}", etag))
+            }
+            Err(e) => {
+                error!("Error uploading file: {:?}", e);
+                Err(())
+            }
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use crate::configs::Connection;
 use crate::configs::Database;
 use crate::configs::PgDump;
-use log::debug;
+use log::trace;
 use tokio::process::Command;
 
 pub async fn dump_database(
@@ -63,7 +63,7 @@ pub async fn dump_database(
     cmd.arg(&database.name);
 
     let commands = format!("{:?}", cmd);
-    debug!("Executing pg_dump command: {}", commands);
+    trace!("Executing pg_dump command: {}", commands);
 
     cmd.env("PGPASSWORD", &connection.password);
 

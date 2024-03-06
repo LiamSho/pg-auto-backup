@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use log::{error, info};
+use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 
 use crate::traits::Storage;
@@ -40,7 +40,12 @@ impl Storage for Local {
         }
     }
 
-    async fn save_file(&self, local_temp_file: &str, save_path: &str, file_name: String) {
+    async fn save_file(
+        &self,
+        local_temp_file: &str,
+        save_path: &str,
+        file_name: String,
+    ) -> Result<String, ()> {
         let save_path = Path::new(&self.path).join(save_path);
         if !save_path.exists() {
             std::fs::create_dir_all(&save_path).unwrap();
@@ -48,16 +53,22 @@ impl Storage for Local {
         let save_path = save_path.join(file_name);
         let save_path = save_path.as_path();
         match tokio::fs::copy(local_temp_file, save_path).await {
-            Ok(_) => info!(
-                "Save file {} to {} success",
-                local_temp_file,
-                save_path.display()
-            ),
-            Err(_) => error!(
-                "Save file {} to {} failed",
-                local_temp_file,
-                save_path.display()
-            ),
-        };
+            Ok(_) => {
+                debug!(
+                    "Save file {} to {} success",
+                    local_temp_file,
+                    save_path.display()
+                );
+                Ok(format!("Local at {}", save_path.display().to_string()))
+            }
+            Err(_) => {
+                error!(
+                    "Save file {} to {} failed",
+                    local_temp_file,
+                    save_path.display()
+                );
+                Err(())
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@ timezone_offset = 0
 
 # Log level
 # Available values:
-#   DEBUG, INFO, WARNING, ERROR, CRITICAL
+#   TRACE, DEBUG, INFO, WARNING, ERROR, OFF
 log_level = "INFO"
 
 

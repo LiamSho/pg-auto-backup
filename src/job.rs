@@ -1,11 +1,11 @@
 use std::path::Path;
 
-use log::{error, info};
+use log::{debug, error, info, trace};
 
 use crate::{configs, pg, traits::Storage};
 
 pub async fn database_backup() {
-    info!("Running backup job");
+    debug!("Running backup job");
 
     let cfg = configs::INSTANCE.get().unwrap();
     let tz: chrono::prelude::FixedOffset =
@@ -35,31 +35,40 @@ pub async fn database_backup() {
             let result =
                 pg::dump_database(db, &cfg.pg_dump, &cfg.connection, local_temp_file).await;
 
-            match result {
+            let result: Result<String, ()> = match result {
                 Err(val) => {
                     error!(
                         "Error dumping database {}, pg_dump exit with {:?}",
                         db.name, val
                     );
+                    Err(())
                 }
                 Ok(_) => {
-                    info!("Database {} dumped successfully", db.name);
+                    trace!("Database {} dumped successfully", db.name);
                     match &cfg.storage {
                         configs::Location::S3(s3) => {
-                            (*s3).save_file(local_temp_file, &db.name, file_name).await;
+                            (*s3).save_file(local_temp_file, &db.name, file_name).await
                         }
                         configs::Location::Local(local) => {
                             (*local)
                                 .save_file(local_temp_file, &db.name, file_name)
-                                .await;
+                                .await
                         }
-                    };
+                    }
                 }
-            }
+            };
 
             match tokio::fs::remove_file(local_temp_file).await {
-                Ok(_) => info!("Remove local temp file: {}", local_temp_file),
+                Ok(_) => trace!("Remove local temp file: {}", local_temp_file),
                 Err(err) => error!("Error removing local temp file: {}", err),
+            };
+
+            match result {
+                Ok(val) => info!(
+                    "Backup database {} successfully, saved to {}",
+                    &db.name, val
+                ),
+                Err(_) => error!("Backup database {} failed", &db.name),
             }
         });
 
@@ -70,5 +79,5 @@ pub async fn database_backup() {
         handle.await.unwrap();
     }
 
-    info!("Backup job completed")
+    debug!("Backup job completed")
 }

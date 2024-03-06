@@ -42,7 +42,6 @@ async fn main() -> Result<(), JobSchedulerError> {
         Ok(s) => {
             let next_datetime = s.upcoming(tz).next().unwrap();
             info!("Next tick of the scheduler: {}", next_datetime);
-
             s
         }
         Err(err) => panic!("Error parsing cron expression: {}", err),
@@ -95,7 +94,7 @@ async fn add_jobs(
                     match next_tick {
                         Ok(Some(ts)) => {
                             let ts = ts.with_timezone(&tz);
-                            info!("Next tick for backup job: {}", ts.to_rfc3339())
+                            info!("Next tick for backup job: {}", ts)
                         }
                         _ => error!("Error getting next tick for backup job"),
                     }
