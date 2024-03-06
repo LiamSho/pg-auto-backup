@@ -36,7 +36,11 @@ impl Default for Config {
                 binary_path: "/usr/bin/pg_dump".to_string(),
                 format: Format::Plain,
                 sections: vec![Section::PreData, Section::Data, Section::PostData],
-                do_not_save: vec![],
+                do_not_save: None,
+                disable: None,
+                clean: None,
+                create: None,
+                extra_args: None,
             },
         }
     }

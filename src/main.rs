@@ -103,20 +103,35 @@ async fn run_job() {
             let local_temp_file = Path::new(&cfg.temp_dir).join(random_file_name);
             let local_temp_file = local_temp_file.as_path().to_str().unwrap();
 
-            pg::dump_database(db, &cfg.pg_dump, &cfg.connection, local_temp_file).await;
+            let result =
+                pg::dump_database(db, &cfg.pg_dump, &cfg.connection, local_temp_file).await;
 
-            match &cfg.storage {
-                configs::Location::S3(s3) => {
-                    (*s3).save_file(local_temp_file, &db.name, file_name).await;
+            match result {
+                Err(val) => {
+                    error!(
+                        "Error dumping database {}, pg_dump exit with {:?}",
+                        db.name, val
+                    );
                 }
-                configs::Location::Local(local) => {
-                    (*local)
-                        .save_file(local_temp_file, &db.name, file_name)
-                        .await;
+                Ok(_) => {
+                    info!("Backup of database {} successed", db.name);
+                    match &cfg.storage {
+                        configs::Location::S3(s3) => {
+                            (*s3).save_file(local_temp_file, &db.name, file_name).await;
+                        }
+                        configs::Location::Local(local) => {
+                            (*local)
+                                .save_file(local_temp_file, &db.name, file_name)
+                                .await;
+                        }
+                    };
                 }
-            };
+            }
 
-            tokio::fs::remove_file(local_temp_file).await.unwrap();
+            match tokio::fs::remove_file(local_temp_file).await {
+                Ok(_) => info!("Remove local temp file: {}", local_temp_file),
+                Err(err) => error!("Error removing local temp file: {}", err),
+            }
         });
 
         handles.push(handle);

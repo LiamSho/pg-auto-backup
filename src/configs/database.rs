@@ -1,10 +1,18 @@
 use serde::{Deserialize, Serialize};
 
+use crate::enums::{Disable, DoNotSave, Section};
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Database {
     pub name: String,
-    pub include_schemata: Vec<String>,
-    pub exclude_schemata: Vec<String>,
-    pub include_tables: Vec<String>,
-    pub exclude_tables: Vec<String>,
+    pub include_schemata: Option<Vec<String>>,
+    pub exclude_schemata: Option<Vec<String>>,
+    pub include_tables: Option<Vec<String>>,
+    pub exclude_tables: Option<Vec<String>>,
+    pub clean: Option<bool>,
+    pub create: Option<bool>,
+    pub sections: Option<Vec<Section>>,
+    pub do_not_save: Option<Vec<DoNotSave>>,
+    pub disable: Option<Vec<Disable>>,
+    pub extra_args: Option<Vec<String>>,
 }
