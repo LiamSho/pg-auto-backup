@@ -1,6 +1,6 @@
 use tokio::process::Command;
 
-use log::info;
+use log::{error, info};
 
 use crate::configs::PgDump;
 
@@ -14,15 +14,29 @@ pub async fn preflight_check(pg_dump: &PgDump) {
         &pg_dump.binary_path
     );
 
-    let status = Command::new(&pg_dump.binary_path)
+    let output = Command::new(&pg_dump.binary_path)
         .arg("--version")
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .status()
-        .await;
+        .output()
+        .await
+        .expect("Failed to execute pg_dump");
 
-    match status {
-        Ok(_) => info!("Preflight check: pg_dump binary found and version is ok"),
-        Err(e) => panic!("Failed to run pg_dump --version: {}", e),
+    let mut output_vec = output.stdout;
+    output_vec.retain(|&c| c != 10 && c != 13);
+    let output_message = String::from_utf8(output_vec);
+
+    match output_message {
+        Ok(val) => info!("Preflight check: pg_dump output: {}", val),
+        Err(e) => error!("Preflight check: Failed to parse pg_dump output: {}", e),
     };
+
+    match output.status.success() {
+        true => info!("Preflight check: pg_dump binary found and version is ok"),
+        false => {
+            let err_message = String::from_utf8(output.stderr).unwrap_or("unknwon".to_string());
+            panic!(
+                "Failed to run pg_dump --version with error: {}",
+                err_message
+            );
+        }
+    }
 }

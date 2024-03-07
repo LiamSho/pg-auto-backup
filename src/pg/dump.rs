@@ -69,10 +69,9 @@ pub async fn dump_database(
 
     let output = cmd.output().await.expect("Failed to execute pg_dump");
 
-    if output.status.success() {
-        Ok(())
-    } else {
-        Err(output.status.code())
+    match output.status.success() {
+        true => Ok(()),
+        false => Err(output.status.code()),
     }
 }
 
