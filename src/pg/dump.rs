@@ -1,13 +1,13 @@
-use crate::configs::Connection;
-use crate::configs::Database;
-use crate::configs::PgDump;
+use crate::configs::client::PgDump;
+use crate::configs::connection::PostgreSQLConnection;
+use crate::configs::database::PostgreSQL;
 use log::trace;
 use tokio::process::Command;
 
 pub async fn dump_database(
-    database: &Database,
+    database: &PostgreSQL,
     pg_dump: &PgDump,
-    connection: &Connection,
+    connection: &PostgreSQLConnection,
     output: &str,
 ) -> Result<(), Option<i32>> {
     let format = match &database.format {

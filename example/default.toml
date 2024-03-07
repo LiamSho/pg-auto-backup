@@ -1,3 +1,4 @@
+[general]
 # Temporary directory for backup files
 temp_dir = "/tmp/pg-auto-backup"
 
@@ -21,7 +22,6 @@ timezone_offset = 0
 #   TRACE, DEBUG, INFO, WARNING, ERROR, OFF
 log_level = "INFO"
 
-
 [storage]
 # Storage type (Local, S3)
 type = "Local"
@@ -30,7 +30,7 @@ type = "Local"
 # When using the Local storage type
 path = "/var/lib/pg-auto-backup"
 
-[connection]
+[connection.postgres]
 # Database host
 host = "localhost"
 
@@ -44,7 +44,7 @@ user = "postgres"
 # Database user password
 password = "password"
 
-[pg_dump]
+[client.pg_dump]
 # Path to pg_dump binary
 binary_path = "/usr/bin/pg_dump"
 
@@ -94,9 +94,11 @@ sections = ["PreData", "Data", "PostData"]
 #   Can be overridden by database specific settings
 ## extra_args = []
 
+[databases]
+
 # Backup multiple databases by duplicating
-# the [[databases]] section
-[[databases]]
+# the [[databases.*]] section
+[[databases.postgresql]]
 # Database name
 name = "my_database"
 

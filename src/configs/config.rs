@@ -1,50 +1,57 @@
-use crate::enums::{Format, Section};
+use crate::enums::{PgFormat, PgSection};
 use log::LevelFilter;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
-use super::{storage::Local, Connection, Database, Location, PgDump};
+use super::{
+    client::PgDump, connection::PostgreSQLConnection, storage::Local, Client, Connection,
+    Databases, General, Storage,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
-    pub temp_dir: String,
-    pub cron: String,
-    pub timezone_offset: i32,
-    pub run_at_start: bool,
-    pub log_level: LevelFilter,
-    pub storage: Location,
-    pub databases: Vec<Database>,
+    pub general: General,
+    pub storage: Storage,
+    pub databases: Databases,
     pub connection: Connection,
-    pub pg_dump: PgDump,
+    pub client: Client,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
-            temp_dir: "/tmp/pg-auto-backup".to_string(),
-            run_at_start: false,
-            cron: "0 0 * * * *".to_string(),
-            timezone_offset: 0,
-            log_level: LevelFilter::Info,
-            storage: Location::Local(Local {
+            general: General {
+                temp_dir: "/tmp/pg-auto-backup".to_string(),
+                run_at_start: false,
+                cron: "0 0 * * * *".to_string(),
+                timezone_offset: 0,
+                log_level: LevelFilter::Info,
+            },
+            storage: Storage::Local(Local {
                 path: "/var/lib/pg-auto-backup".to_string(),
             }),
-            databases: vec![],
-            connection: Connection {
-                host: "localhost".to_string(),
-                port: 5432,
-                user: "postgres".to_string(),
-                password: "password".to_string(),
+            databases: Databases {
+                postgresql: Vec::new(),
             },
-            pg_dump: PgDump {
-                binary_path: "/usr/bin/pg_dump".to_string(),
-                format: Format::Plain,
-                sections: vec![Section::PreData, Section::Data, Section::PostData],
-                do_not_save: None,
-                disable: None,
-                clean: None,
-                create: None,
-                extra_args: None,
+            connection: Connection {
+                postgresql: Some(PostgreSQLConnection {
+                    host: "localhost".to_string(),
+                    port: 5432,
+                    user: "postgres".to_string(),
+                    password: "password".to_string(),
+                }),
+            },
+            client: Client {
+                pg_dump: Some(PgDump {
+                    binary_path: "/usr/bin/pg_dump".to_string(),
+                    format: PgFormat::Plain,
+                    sections: vec![PgSection::PreData, PgSection::Data, PgSection::PostData],
+                    do_not_save: None,
+                    disable: None,
+                    clean: None,
+                    create: None,
+                    extra_args: None,
+                }),
             },
         }
     }

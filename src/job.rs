@@ -9,15 +9,15 @@ pub async fn database_backup() {
 
     let cfg = configs::INSTANCE.get().unwrap();
     let tz: chrono::prelude::FixedOffset =
-        chrono::FixedOffset::east_opt(cfg.timezone_offset * 3600).unwrap();
+        chrono::FixedOffset::east_opt(cfg.general.timezone_offset * 3600).unwrap();
 
     let mut handles = vec![];
 
-    for db in &cfg.databases {
+    for db in &cfg.databases.postgresql {
         let handle = tokio::spawn(async move {
             let file_ext = match &db.format {
                 Some(val) => val.get_file_ext(),
-                None => &cfg.pg_dump.format.get_file_ext(),
+                None => &cfg.client.pg_dump.as_ref().unwrap().format.get_file_ext(),
             };
 
             let file_name = format!(
@@ -29,11 +29,18 @@ pub async fn database_backup() {
             );
             let random_file_name = uuid::Uuid::new_v4().to_string();
             let local_temp_file =
-                Path::new(&cfg.temp_dir).join(format!("{}.{}", random_file_name, file_ext));
+                Path::new(&cfg.general.temp_dir).join(format!("{}.{}", random_file_name, file_ext));
             let local_temp_file = local_temp_file.as_path().to_str().unwrap();
 
-            let result =
-                pg::dump_database(db, &cfg.pg_dump, &cfg.connection, local_temp_file).await;
+            let postgresql_connection = (&cfg.connection.postgresql).as_ref().unwrap();
+
+            let result = pg::dump_database(
+                db,
+                &cfg.client.pg_dump.as_ref().unwrap(),
+                postgresql_connection,
+                local_temp_file,
+            )
+            .await;
 
             let result: Result<String, ()> = match result {
                 Err(val) => {
@@ -46,15 +53,15 @@ pub async fn database_backup() {
                 Ok(_) => {
                     trace!("Database {} dumped successfully", db.name);
                     match &cfg.storage {
-                        configs::Location::S3(s3) => {
+                        configs::Storage::S3(s3) => {
                             (*s3).save_file(local_temp_file, &db.name, file_name).await
                         }
-                        configs::Location::Local(local) => {
+                        configs::Storage::Local(local) => {
                             (*local)
                                 .save_file(local_temp_file, &db.name, file_name)
                                 .await
                         }
-                        configs::Location::Azure(azure) => {
+                        configs::Storage::Azure(azure) => {
                             (*azure)
                                 .save_file(local_temp_file, &db.name, file_name)
                                 .await

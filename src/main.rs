@@ -26,7 +26,7 @@ async fn main() -> Result<(), JobSchedulerError> {
     let cfg = configs::INSTANCE.get().unwrap();
 
     env_logger::Builder::new()
-        .filter_level(cfg.log_level)
+        .filter_level(cfg.general.log_level)
         .init();
 
     let app_version = env!("CARGO_PKG_VERSION");
@@ -34,9 +34,9 @@ async fn main() -> Result<(), JobSchedulerError> {
 
     preflight_check().await;
 
-    let tz = FixedOffset::east_opt(cfg.timezone_offset * 3600).unwrap();
+    let tz = FixedOffset::east_opt(cfg.general.timezone_offset * 3600).unwrap();
 
-    let cron_expression = cfg.cron.as_str();
+    let cron_expression = cfg.general.cron.as_str();
     info!("Cron expression: {}", cron_expression);
     let schedule = match Schedule::from_str(cron_expression) {
         Ok(s) => {
@@ -49,7 +49,7 @@ async fn main() -> Result<(), JobSchedulerError> {
 
     let mut sched = JobScheduler::new().await?;
 
-    let run_at_start = &cfg.run_at_start;
+    let run_at_start = &cfg.general.run_at_start;
     add_jobs(&mut sched, schedule, tz, *run_at_start).await?;
 
     info!("Starting scheduler");
@@ -67,37 +67,37 @@ async fn main() -> Result<(), JobSchedulerError> {
 async fn preflight_check() {
     let cfg = configs::INSTANCE.get().unwrap();
 
-    pg::preflight_check(&cfg.pg_dump).await;
+    pg::preflight_check(&cfg.client.pg_dump.as_ref().unwrap()).await;
 
     info!("Preflight check: check temp storage location");
-    let temp_path = std::path::Path::new(&cfg.temp_dir);
+    let temp_path = std::path::Path::new(&cfg.general.temp_dir);
     match temp_path.exists() {
         true => match temp_path.is_dir() {
             true => info!(
                 "Preflight check: temp storage location {} exists",
-                &cfg.temp_dir
+                &cfg.general.temp_dir
             ),
             false => panic!(
                 "Preflight check: temp storage location {} is not a directory",
-                &cfg.temp_dir
+                &cfg.general.temp_dir
             ),
         },
         false => match tokio::fs::create_dir_all(temp_path).await {
             Ok(_) => info!(
                 "Preflight check: create temp storage location {}",
-                &cfg.temp_dir
+                &cfg.general.temp_dir
             ),
             Err(_) => panic!(
                 "Preflight check: cannot create temp storage location {}",
-                &cfg.temp_dir
+                &cfg.general.temp_dir
             ),
         },
     }
 
     match &cfg.storage {
-        configs::Location::S3(s3) => (*s3).preflight_check().await,
-        configs::Location::Local(local) => (*local).preflight_check().await,
-        configs::Location::Azure(azure) => (*azure).preflight_check().await,
+        configs::Storage::S3(s3) => (*s3).preflight_check().await,
+        configs::Storage::Local(local) => (*local).preflight_check().await,
+        configs::Storage::Azure(azure) => (*azure).preflight_check().await,
     }
 }
 
@@ -116,7 +116,7 @@ async fn add_jobs(
                     job::database_backup().await;
 
                     let cfg = configs::INSTANCE.get().unwrap();
-                    let tz = FixedOffset::east_opt(cfg.timezone_offset * 3600).unwrap();
+                    let tz = FixedOffset::east_opt(cfg.general.timezone_offset * 3600).unwrap();
 
                     let next_tick = l.next_tick_for_job(uuid).await;
                     match next_tick {

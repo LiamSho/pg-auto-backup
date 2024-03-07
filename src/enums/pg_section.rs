@@ -3,18 +3,18 @@ use std::fmt;
 use std::fmt::Formatter;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum Section {
+pub enum PgSection {
     PreData,
     Data,
     PostData,
 }
 
-impl fmt::Display for Section {
+impl fmt::Display for PgSection {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Section::PreData => write!(f, "pre-data"),
-            Section::Data => write!(f, "data"),
-            Section::PostData => write!(f, "post-data"),
+            PgSection::PreData => write!(f, "pre-data"),
+            PgSection::Data => write!(f, "data"),
+            PgSection::PostData => write!(f, "post-data"),
         }
     }
 }

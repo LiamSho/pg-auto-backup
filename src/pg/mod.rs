@@ -2,11 +2,11 @@ use tokio::process::Command;
 
 use log::{error, info};
 
-use crate::configs::PgDump;
-
 mod dump;
 
 pub use dump::dump_database;
+
+use crate::configs::client::PgDump;
 
 pub async fn preflight_check(pg_dump: &PgDump) {
     info!(
