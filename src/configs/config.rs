@@ -10,6 +10,7 @@ pub struct Config {
     pub temp_dir: String,
     pub cron: String,
     pub timezone_offset: i32,
+    pub run_at_start: bool,
     pub log_level: LevelFilter,
     pub storage: Location,
     pub databases: Vec<Database>,
@@ -21,6 +22,7 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             temp_dir: "/tmp/pg-auto-backup".to_string(),
+            run_at_start: false,
             cron: "0 0 * * * *".to_string(),
             timezone_offset: 0,
             log_level: LevelFilter::Info,

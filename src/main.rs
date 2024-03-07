@@ -49,7 +49,8 @@ async fn main() -> Result<(), JobSchedulerError> {
 
     let mut sched = JobScheduler::new().await?;
 
-    add_jobs(&mut sched, schedule, tz).await?;
+    let run_at_start = &cfg.run_at_start;
+    add_jobs(&mut sched, schedule, tz, *run_at_start).await?;
 
     info!("Starting scheduler");
     sched.start().await?;
@@ -104,8 +105,9 @@ async fn add_jobs(
     sched: &mut JobScheduler,
     schedule: Schedule,
     timezone_offset: FixedOffset,
+    run_at_start: bool,
 ) -> Result<uuid::Uuid, JobSchedulerError> {
-    sched
+    let resut = sched
         .add(Job::new_cron_job_async_tz(
             schedule,
             timezone_offset,
@@ -127,5 +129,17 @@ async fn add_jobs(
                 })
             },
         )?)
-        .await
+        .await;
+
+    match resut {
+        Ok(val) => {
+            if run_at_start {
+                info!("Running job at start");
+                job::database_backup().await;
+                info!("Running job at start finished")
+            }
+            Ok(val)
+        }
+        Err(err) => Err(err),
+    }
 }

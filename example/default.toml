@@ -1,6 +1,9 @@
 # Temporary directory for backup files
 temp_dir = "/tmp/pg-auto-backup"
 
+# Run the job once before starting the scheduler
+run_at_start = false
+
 # Cron expression for backup schedule
 # Order: second, minute, hour, day of month, month, day of week
 cron = "0 0 * * * *"
