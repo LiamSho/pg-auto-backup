@@ -1,0 +1,6 @@
+storage:
+  type: Local
+
+  # Storage path for local backup files
+  # It is only used when the storage type is Local
+  path: "/var/lib/pg-auto-backup"

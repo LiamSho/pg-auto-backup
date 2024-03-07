@@ -1,6 +1,0 @@
-[storage]
-type = "Local"
-
-# The directory where the backup files will be stored
-# When using the Local storage type
-path = "/var/lib/pg-auto-backup"

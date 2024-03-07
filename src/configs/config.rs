@@ -1,20 +1,14 @@
-use crate::enums::{PgFormat, PgSection};
 use log::LevelFilter;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
-use super::{
-    client::PgDump, connection::PostgreSQLConnection, storage::Local, Client, Connection,
-    Databases, General, Storage,
-};
+use super::{storage::Local, Database, General, Storage};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub general: General,
     pub storage: Storage,
-    pub databases: Databases,
-    pub connection: Connection,
-    pub client: Client,
+    pub database: Database,
 }
 
 impl Default for Config {
@@ -30,29 +24,7 @@ impl Default for Config {
             storage: Storage::Local(Local {
                 path: "/var/lib/pg-auto-backup".to_string(),
             }),
-            databases: Databases {
-                postgresql: Vec::new(),
-            },
-            connection: Connection {
-                postgresql: Some(PostgreSQLConnection {
-                    host: "localhost".to_string(),
-                    port: 5432,
-                    user: "postgres".to_string(),
-                    password: "password".to_string(),
-                }),
-            },
-            client: Client {
-                pg_dump: Some(PgDump {
-                    binary_path: "/usr/bin/pg_dump".to_string(),
-                    format: PgFormat::Plain,
-                    sections: vec![PgSection::PreData, PgSection::Data, PgSection::PostData],
-                    do_not_save: None,
-                    disable: None,
-                    clean: None,
-                    create: None,
-                    extra_args: None,
-                }),
-            },
+            database: Database { postgresql: None },
         }
     }
 }

@@ -19,4 +19,4 @@ VOLUME [ "/app/config"]
 VOLUME [ "/var/lib/pg-auto-backup" ]
 
 ENTRYPOINT [ "/app/pg-auto-backup" ]
-CMD [ "-c", "/app/config/config.toml" ]
+CMD [ "-c", "/app/config/config.yaml" ]

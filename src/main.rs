@@ -7,10 +7,12 @@ use tokio::signal;
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
 use traits::Storage;
 
+use crate::traits::PreflightCheck;
+
 mod configs;
 mod enums;
 mod job;
-mod pg;
+mod provider;
 mod traits;
 
 #[tokio::main]
@@ -67,7 +69,11 @@ async fn main() -> Result<(), JobSchedulerError> {
 async fn preflight_check() {
     let cfg = configs::INSTANCE.get().unwrap();
 
-    pg::preflight_check(&cfg.client.pg_dump.as_ref().unwrap()).await;
+    let database_check_result = &cfg.database.preflight_check().await;
+    match database_check_result {
+        Ok(_) => info!("Preflight check: database check OK"),
+        Err(err) => panic!("Preflight check: database error: {}", err),
+    }
 
     info!("Preflight check: check temp storage location");
     let temp_path = std::path::Path::new(&cfg.general.temp_dir);

@@ -1,0 +1,38 @@
+general:
+  # Temporary directory for backup files
+  temp_dir: "/tmp/pg-auto-backup"
+
+  # Cron expression for backup schedule
+  # Order: second, minute, hour, day of month, month, day of week
+  cron: "0 0 * * * *"
+
+  # Timezone offset in hours
+  # It only affects the log output
+  # The timestamp in the start of the log output will always be UTC
+  #  0: UTC
+  #  8: CST (China Standard Time)
+  # -5: EST (Eastern Standard Time)
+  timezone_offset: 0
+
+  # Run the job once before the schedule starts
+  run_at_start: false
+
+  # Log level
+  # Available values: TRACE, DEBUG, INFO, WARNING, ERROR, OFF
+  log_level: "INFO"
+
+# See examples in the `storage` directory for more details
+storage:
+  # Storage type
+  # Available values: Local, S3, Azure
+  type: Local
+
+  # Storage path for local backup files
+  # It is only used when the storage type is Local
+  path: "/var/lib/pg-auto-backup"
+
+# See examples in the `database` directory for more details
+database:
+  # PostgreSQL database configuration
+  # Checkout `database/postgresql.yaml` for more details
+  postgresql:

@@ -1,0 +1,28 @@
+storage:
+  type: "S3"
+
+  # S3 Access key
+  access_key: ""
+
+  # S3 Secret key
+  access_secret: ""
+
+  # S3 Endpoint
+  endpoint: ""
+
+  # S3 Region
+  region: ""
+
+  # S3 Bucket
+  bucket: ""
+
+  # S3 Enforce path style
+  # Enable this option for MinIO and other S3-compatible services
+  enforce_path_style: false
+
+  # S3 Path in the bucket
+  #   Can be omitted for the root of the bucket
+  # Do not include the leading and trailing slashes
+  #   OK: path: "my/path"
+  #   NG: path: "/my/path/"
+  ## path: ""
