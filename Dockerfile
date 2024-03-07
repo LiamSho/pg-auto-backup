@@ -4,14 +4,14 @@ COPY . /build
 
 WORKDIR /build
 
-RUN apk add --no-cache build-base
+RUN apk add build-base pkgconfig musl-dev openssl-dev openssl-libs-static
 RUN cargo build --release
 
 FROM docker.io/library/alpine:3.19
 
 ARG PG_VERSION=16
 
-RUN apk add --no-cache postgresql${PG_VERSION}-client
+RUN apk add postgresql${PG_VERSION}-client
 
 WORKDIR /app
 
