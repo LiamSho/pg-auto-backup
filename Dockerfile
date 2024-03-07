@@ -9,9 +9,7 @@ RUN cargo build --release
 
 FROM docker.io/library/alpine:3.19
 
-ARG PG_VERSION=16
-
-RUN apk add postgresql${PG_VERSION}-client
+RUN apk add postgresql14-client postgresql15-client postgresql16-client
 
 WORKDIR /app
 
