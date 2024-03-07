@@ -68,6 +68,31 @@ async fn preflight_check() {
 
     pg::preflight_check(&cfg.pg_dump).await;
 
+    info!("Preflight check: check temp storage location");
+    let temp_path = std::path::Path::new(&cfg.temp_dir);
+    match temp_path.exists() {
+        true => match temp_path.is_dir() {
+            true => info!(
+                "Preflight check: temp storage location {} exists",
+                &cfg.temp_dir
+            ),
+            false => panic!(
+                "Preflight check: temp storage location {} is not a directory",
+                &cfg.temp_dir
+            ),
+        },
+        false => match tokio::fs::create_dir_all(temp_path).await {
+            Ok(_) => info!(
+                "Preflight check: create temp storage location {}",
+                &cfg.temp_dir
+            ),
+            Err(_) => panic!(
+                "Preflight check: cannot create temp storage location {}",
+                &cfg.temp_dir
+            ),
+        },
+    }
+
     match &cfg.storage {
         configs::Location::S3(s3) => (*s3).preflight_check().await,
         configs::Location::Local(local) => (*local).preflight_check().await,
