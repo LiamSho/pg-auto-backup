@@ -14,9 +14,20 @@ pub struct Database {
 
 impl PreflightCheck for Database {
     async fn preflight_check(&self) -> Result<(), String> {
-        match &self.postgresql {
-            Some(postgresql) => postgresql.preflight_check().await,
+        let mut empty = true;
+
+        let result = match &self.postgresql {
+            Some(postgresql) => {
+                empty = false;
+                postgresql.preflight_check().await
+            }
             None => Ok(()),
+        };
+
+        if empty {
+            Err("No database configuration found".to_string())
+        } else {
+            result
         }
     }
 }
