@@ -141,6 +141,19 @@ impl Dump<PgDump, PostgreSQLConnection> for PostgreSQLDatabase {
         apply_selective_args_some(cmd, "schema", &self.include_schemata);
         apply_selective_args_some(cmd, "exclude-schema", &self.exclude_schemata);
 
+        // role
+        match &self.role {
+            Some(val) => {
+                cmd.arg(format!("--role={role}", role = val));
+            }
+            None => match &pg_dump.role {
+                Some(val) => {
+                    cmd.arg(format!("--role={role}", role = val));
+                }
+                None => (),
+            },
+        }
+
         // extra_args
         match &self.extra_args {
             Some(val) => {

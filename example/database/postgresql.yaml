@@ -30,6 +30,12 @@ postgresql:
       - "Data"
       - "PostData"
 
+    # Set role before dumping
+    #   Can be omitted
+    #   Can be overridden by database specific settings
+    # --role={} option in pg_dump
+    ## role: "my_role"
+
     # Whether to create the database before restoring
     #   Can be omitted
     #   Can be overridden by database specific settings
@@ -76,7 +82,7 @@ postgresql:
 
       # Format of the backup (Plain, Custom, Tar)
       #   Can be omitted
-      #   Will override the pg_dump.format option
+      #   Will override the client.format option
       # Note that the directory type is not supported
       # --format={} option in pg_dump
       ## format: "Plain"
@@ -103,28 +109,34 @@ postgresql:
 
       # Section to include in the backup (PreData, Data, PostData)
       #   Can be omitted
-      #   Will override the pg_dump.sections option
+      #   Will override the client.sections option
       # --section={} option in pg_dump
       ## sections:
       ##   - "PreData"
       ##   - "Data"
       ##   - "PostData"
 
+      # Set role before dumping
+      #   Can be omitted
+      #   Will override the client.role option
+      # --role={} option in pg_dump
+      ## role: "my_role"
+
       # Whether to create the database before restoring
       #   Can be omitted
-      #   Will override the pg_dump.create option
+      #   Will override the client.create option
       # --create option in pg_dump
       ## create: false
 
       # Whether to drop the database before restoring
       #   Can be omitted
-      #   Will override the pg_dump.clean option
+      #   Will override the client.clean option
       # --clean option in pg_dump
       ## clean: false
 
       # Do not save the corresponding data
       #   Can be omitted
-      #   Will override the pg_dump.do_not_save option
+      #   Will override the client.do_not_save option
       # Available values:
       #   LargeObjects, Owner, Privileges, Comments,
       #   Publications, SecurityLabels, Subscriptions,
@@ -135,7 +147,7 @@ postgresql:
 
       # Disable something
       #   Can be omitted
-      #   Will override the pg_dump.disable option
+      #   Will override the client.disable option
       # Available values:
       #   DollarQuoting, Triggers
       # --disable={} option in pg_dump
@@ -143,5 +155,5 @@ postgresql:
 
       # Extra arguments for pg_dump
       #   Can be omitted
-      #   Will override the pg_dump.extra_args option
+      #   Will override the client.extra_args option
       ## extra_args: []

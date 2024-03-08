@@ -11,6 +11,7 @@ pub struct PgDump {
     pub binary_path: String,
     pub format: PgFormat,
     pub sections: Vec<PgSection>,
+    pub role: Option<String>,
     pub clean: Option<bool>,
     pub create: Option<bool>,
     pub do_not_save: Option<Vec<PgDoNotSave>>,
