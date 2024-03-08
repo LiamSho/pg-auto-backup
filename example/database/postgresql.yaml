@@ -1,16 +1,20 @@
 postgresql:
   connection:
     # Database host
+    # Use env=ENV_NAME to get the value from the environment variable
     host: "localhost"
 
     # Database port
+    # Use env=ENV_NAME to get the value from the environment variable
     port: 5432
 
     # Database user
     # Note that the user must have the necessary permissions to perform the backup
+    # Use env=ENV_NAME to get the value from the environment variable
     user: "postgres"
 
     # Database user password
+    # Use env=ENV_NAME to get the value from the environment variable
     password: "password"
 
   client:

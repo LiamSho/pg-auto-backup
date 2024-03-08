@@ -52,6 +52,9 @@ impl From<&String> for PostgreSQLDatabase {
 
 impl PreflightCheck for PostgreSQL {
     async fn preflight_check(&self) -> Result<(), String> {
-        self.client.preflight_check().await
+        self.client.preflight_check().await?;
+        self.connection.preflight_check().await?;
+
+        Ok(())
     }
 }
