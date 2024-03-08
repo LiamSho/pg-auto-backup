@@ -1,6 +1,11 @@
+use std::{fs::File, io::Read};
+
 use azure_storage::StorageCredentials;
-use azure_storage_blobs::prelude::{ClientBuilder, ContainerClient};
-use log::{debug, error, info};
+use azure_storage_blobs::{
+    blob::{BlobBlockType, BlockList},
+    prelude::{BlockId, ClientBuilder, ContainerClient},
+};
+use log::{debug, error, info, trace};
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
@@ -15,6 +20,7 @@ pub struct Azure {
     access_key: String,
     #[serde(deserialize_with = "string_or_env")]
     container: String,
+    chunk_size: Option<usize>,
 }
 
 static AZ_CLIENT: OnceCell<ContainerClient> = OnceCell::new();
@@ -55,8 +61,44 @@ impl Storage for Azure {
         let client = AZ_CLIENT.get().unwrap();
         let blob_client = client.blob_client(key);
 
-        let body = std::fs::read(local_temp_file).unwrap();
-        let result = blob_client.put_block_blob(body).await;
+        let mut file = File::open(local_temp_file).unwrap();
+        let mut total_bytes_uploaded: usize = 0;
+        let mut blocks = BlockList::default();
+
+        let chunk_size = self.chunk_size.unwrap_or(16);
+
+        loop {
+            let mut buffer = vec![0; chunk_size * 1024 * 1024];
+            match file.read(&mut buffer) {
+                Ok(n) => {
+                    if n == 0 {
+                        break;
+                    }
+                    buffer.truncate(n);
+                    let block_id = BlockId::new(format!("{total_bytes_uploaded:016x}"));
+                    trace!("Azure upload block id: {:?} {}", block_id, n);
+                    blocks
+                        .blocks
+                        .push(BlobBlockType::Uncommitted(block_id.clone()));
+                    match blob_client.put_block(block_id, buffer).await {
+                        Ok(response) => {
+                            trace!("Azure upload block response: {:?}", response);
+                            total_bytes_uploaded += n;
+                        }
+                        Err(e) => {
+                            error!("Error uploading block: {:?}", e);
+                            return Err(());
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("Error uploading block: {:?}", e);
+                    return Err(());
+                }
+            }
+        }
+
+        let result = blob_client.put_block_list(blocks).await;
 
         match result {
             Ok(val) => {

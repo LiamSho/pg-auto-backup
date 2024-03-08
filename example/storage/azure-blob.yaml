@@ -18,4 +18,10 @@ storage:
   # Do not include the leading and trailing slashes
   #   OK: path = "my/path"
   #   NG: path = "/my/path/"
-  ## path = ""
+  ## path: ""
+
+  # Azure Blob Storage upload chunk size in MB
+  #   Can be omitted for 16MB by default
+  # A more larger value can improve the upload performance
+  # But it may cause the memory usage to increase a lot
+  ## chunk_size: 16

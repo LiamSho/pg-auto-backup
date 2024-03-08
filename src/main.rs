@@ -30,6 +30,7 @@ async fn main() -> Result<(), JobSchedulerError> {
 
     env_logger::Builder::new()
         .filter_level(cfg.general.log_level)
+        .filter_module("azure_core::policies::transport", log::LevelFilter::Info)
         .init();
 
     let app_version = env!("CARGO_PKG_VERSION");
