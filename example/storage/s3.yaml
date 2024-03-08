@@ -2,18 +2,23 @@ storage:
   type: "S3"
 
   # S3 Access key
+  # Use env=ENV_NAME to get the value from the environment variable
   access_key: ""
 
   # S3 Secret key
+  # Use env=ENV_NAME to get the value from the environment variable
   access_secret: ""
 
   # S3 Endpoint
+  # Use env=ENV_NAME to get the value from the environment variable
   endpoint: ""
 
   # S3 Region
+  # Use env=ENV_NAME to get the value from the environment variable
   region: ""
 
   # S3 Bucket
+  # Use env=ENV_NAME to get the value from the environment variable
   bucket: ""
 
   # S3 Enforce path style

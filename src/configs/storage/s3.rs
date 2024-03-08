@@ -8,14 +8,19 @@ use log::{debug, error, info};
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
-use crate::traits::Storage;
+use crate::{extension::string_or_env, traits::Storage};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct S3 {
+    #[serde(deserialize_with = "string_or_env")]
     pub access_key: String,
+    #[serde(deserialize_with = "string_or_env")]
     pub access_secret: String,
+    #[serde(deserialize_with = "string_or_env")]
     pub endpoint: String,
+    #[serde(deserialize_with = "string_or_env")]
     pub region: String,
+    #[serde(deserialize_with = "string_or_env")]
     pub bucket: String,
     pub path: Option<String>,
     pub enforce_path_style: bool,

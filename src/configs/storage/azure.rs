@@ -4,13 +4,16 @@ use log::{debug, error, info};
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
-use crate::traits::Storage;
+use crate::{extension::string_or_env, traits::Storage};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Azure {
     path: Option<String>,
+    #[serde(deserialize_with = "string_or_env")]
     account: String,
+    #[serde(deserialize_with = "string_or_env")]
     access_key: String,
+    #[serde(deserialize_with = "string_or_env")]
     container: String,
 }
 

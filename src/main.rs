@@ -11,6 +11,7 @@ use crate::traits::PreflightCheck;
 
 mod configs;
 mod enums;
+mod extension;
 mod job;
 mod provider;
 mod traits;

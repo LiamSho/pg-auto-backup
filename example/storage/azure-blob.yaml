@@ -2,12 +2,15 @@ storage:
   type: "Azure"
 
   # Azure Storage Account name
+  # Use env=ENV_NAME to get the value from the environment variable
   account: ""
 
   # Azure Storage Account access key
+  # Use env=ENV_NAME to get the value from the environment variable
   access_key: ""
 
   # Azure Blob Container name
+  # Use env=ENV_NAME to get the value from the environment variable
   container: ""
 
   # Azure Blob Path in the container

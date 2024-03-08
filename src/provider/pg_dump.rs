@@ -113,13 +113,14 @@ impl Dump<PgDump, PostgreSQLConnection> for PostgreSQLDatabase {
             None => &pg_dump.format,
         };
 
-        let conn = &connection.parse();
-
         let mut binding = Command::new(&pg_dump.binary_path);
         let cmd = binding
-            .arg(format!("--host={host}", host = &conn.host))
-            .arg(format!("--port={port}", port = &conn.port))
-            .arg(format!("--username={username}", username = &conn.user))
+            .arg(format!("--host={host}", host = &connection.host))
+            .arg(format!("--port={port}", port = &connection.port))
+            .arg(format!(
+                "--username={username}",
+                username = &connection.user
+            ))
             .arg(format!("--format={format}", format = format))
             .arg(format!("--file={output}", output = output));
 
@@ -175,7 +176,7 @@ impl Dump<PgDump, PostgreSQLConnection> for PostgreSQLDatabase {
         let commands = format!("{:?}", cmd);
         trace!("Executing pg_dump command: {}", commands);
 
-        cmd.env("PGPASSWORD", &conn.password);
+        cmd.env("PGPASSWORD", &connection.password);
 
         let output = cmd.output().await.expect("Failed to execute pg_dump");
 
